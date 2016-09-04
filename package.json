@@ -2,43 +2,22 @@
     "author": "Pebble Technology",
     "dependencies": {},
     "keywords": [],
-    "name": "pebblejs-weather",
+    "name": "pebblejs-tube-helper-app",
     "pebble": {
         "capabilities": [
             "location"
         ],
-        "displayName": "PebbleJS Weather",
+        "displayName": "PebbleJS Tube Helper App",
         "enableMultiJS": false,
         "messageKeys": {
-            "WEATHER_CITY_KEY": 3,
-            "WEATHER_HUMIDITY_KEY": 2,
-            "WEATHER_ICON_KEY": 0,
-            "WEATHER_TEMPERATURE_KEY": 1
+            "TUBE_STATION_DIRECTION_KEY": 3,
+            "TUBE_STATION_DISTANCE_KEY": 2,
+            "TUBE_STATION_NAME_KEY": 0,
+            "TUBE_STATION_ZONE_KEY": 1
         },
         "projectType": "native",
         "resources": {
-            "media": [
-                {
-                    "file": "images/sun.png",
-                    "name": "IMAGE_SUN",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/snow.png",
-                    "name": "IMAGE_SNOW",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/rain.png",
-                    "name": "IMAGE_RAIN",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/cloud.png",
-                    "name": "IMAGE_CLOUD",
-                    "type": "bitmap"
-                }
-            ]
+            "media": []
         },
         "sdkVersion": "3",
         "targetPlatforms": [

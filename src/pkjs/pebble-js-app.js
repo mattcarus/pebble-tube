@@ -1,44 +1,34 @@
-var myAPIKey = '4926881c880ebba1b35947768def0c05';
-
-function iconFromWeatherId(weatherId) {
-  if (weatherId < 600) {
-    return 2;
-  } else if (weatherId < 700) {
-    return 3;
-  } else if (weatherId > 800) {
-    return 1;
-  } else {
-    return 0;
-  }
-}
-
-function fetchWeather(latitude, longitude) {
+function fetchNearestTubeStation(latitude, longitude) {
+  
+  // For testing only
+  latitude = 51.483745;
+  longitude = 0.007231;
+  
   var req = new XMLHttpRequest();
-  req.open('GET', 'http://api.openweathermap.org/data/2.5/weather?' +
-    'lat=' + latitude + '&lon=' + longitude + '&cnt=1&appid=' + myAPIKey, true);
-  req.open('GET', 'http://api.openweathermap.org/data/2.5/weather?' +
-           'lat=51.897311&lon=-2.066631&cnt=1&appid=' + myAPIKey, true);
-  
-  // Forecast from http://api.openweathermap.org/data/2.5/forecast?lat=51.9439020&lon=-2.0651977&mode=json&appid=4926881c880ebba1b35947768def0c05
-  
+  var url = 'http://marquisdegeek.com/api/tube/?long=' + longitude + '&lat=' + latitude + '&distance=1000&sortby=distance';
+  console.log(url);
+  req.open('GET', url, true);
+
   req.onload = function () {
     if (req.readyState === 4) {
       if (req.status === 200) {
         console.log(req.responseText);
         var response = JSON.parse(req.responseText);
-        var temperature = Math.round(response.main.temp - 273.15);
-        var humidity = response.main.humidity;
-        var icon = iconFromWeatherId(response.weather[0].id);
-        var city = response.name;
-        console.log(temperature);
-        console.log(humidity);
-        console.log(icon);
-        console.log(city);
+        var name = response[0].name;
+        var zone = response[0].zone;
+        var distance = Math.floor(response[0].results.distance);
+        console.log("Direction from: " + latitude + ", " + longitude + ", " + response[0].latitude + ", " + response[0].longitude);
+        var direction = getDirection(latitude, longitude, response[0].latitude, response[0].longitude);
+        //var direction = 123;
+        console.log(name);
+        console.log(zone);
+        console.log(distance);
+        console.log(direction);
         Pebble.sendAppMessage({
-          'WEATHER_ICON_KEY': icon,
-          'WEATHER_TEMPERATURE_KEY': temperature + '\xB0C',
-          'WEATHER_HUMIDITY_KEY': humidity + '%',
-          'WEATHER_CITY_KEY': city
+          'TUBE_STATION_NAME_KEY': name,
+          'TUBE_STATION_ZONE_KEY': 'Zone: ' + zone,
+          'TUBE_STATION_DISTANCE_KEY': distance + 'm',
+          'TUBE_STATION_DIRECTION_KEY': direction + '\xB0'
         });
       } else {
         console.log('Error');
@@ -48,17 +38,29 @@ function fetchWeather(latitude, longitude) {
   req.send(null);
 }
 
+function getDirection(fromLat, fromLng, toLat, toLng) {
+  var dLon = (toLng-fromLng);
+  var y = Math.sin(dLon) * Math.cos(toLat);
+  var x = Math.cos(fromLat)*Math.sin(toLat) - Math.sin(fromLat)*Math.cos(toLat)*Math.cos(dLon);
+  var brng = _toDeg(Math.atan2(y, x));
+  return Math.round(360 - ((brng + 360) % 360));
+}
+
+function _toDeg(rad) {
+  return rad * 180 / Math.PI;
+}
 function locationSuccess(pos) {
   var coordinates = pos.coords;
-  fetchWeather(coordinates.latitude, coordinates.longitude);
+  fetchNearestTubeStation(coordinates.latitude, coordinates.longitude);
 }
 
 function locationError(err) {
   console.warn('location error (' + err.code + '): ' + err.message);
   Pebble.sendAppMessage({
-    'WEATHER_CITY_KEY': 'Loc Unavailable',
-    'WEATHER_TEMPERATURE_KEY': 'N/A',
-    'WEATHER_HUMIDITY_KEY': 'N/A'
+    'TUBE_STATION_NAME_KEY': 'Loc Unavailable',
+    'TUBE_STATION_ZONE_KEY': 'N/A',
+    'TUBE_STATION_DISTANCE_KEY': 'N/A',
+    'TUBE_STATION_DIRECTION_KEY': 'N/A'
   });
 }
 
