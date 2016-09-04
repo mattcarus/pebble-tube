@@ -1,0 +1,56 @@
+{
+    "author": "Pebble Technology",
+    "dependencies": {},
+    "keywords": [],
+    "name": "pebblejs-weather",
+    "pebble": {
+        "capabilities": [
+            "location"
+        ],
+        "displayName": "PebbleJS Weather",
+        "enableMultiJS": false,
+        "messageKeys": {
+            "WEATHER_CITY_KEY": 3,
+            "WEATHER_HUMIDITY_KEY": 2,
+            "WEATHER_ICON_KEY": 0,
+            "WEATHER_TEMPERATURE_KEY": 1
+        },
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "file": "images/sun.png",
+                    "name": "IMAGE_SUN",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/snow.png",
+                    "name": "IMAGE_SNOW",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/rain.png",
+                    "name": "IMAGE_RAIN",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/cloud.png",
+                    "name": "IMAGE_CLOUD",
+                    "type": "bitmap"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "chalk",
+            "diorite"
+        ],
+        "uuid": "74460383-8a0f-4bb6-971f-8937c2ed4441",
+        "watchapp": {
+            "watchface": false
+        }
+    },
+    "version": "2.0.0"
+}
