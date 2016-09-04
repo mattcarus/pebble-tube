@@ -1,11 +1,14 @@
+var appId = '1701c678';
+var appKey = 'd87d9b5b974f2f4e784bbd680e6cbba5';
+
 function fetchNearestTubeStation(latitude, longitude) {
-  
+  var searchRadius = 200;      // Search radius (metres)
   // For testing only
-  latitude = 51.483745;
-  longitude = 0.007231;
+  latitude = 51.51544625;
+  longitude = -0.14101982;
   
   var req = new XMLHttpRequest();
-  var url = 'http://marquisdegeek.com/api/tube/?long=' + longitude + '&lat=' + latitude + '&distance=1000&sortby=distance';
+  var url = 'https://api.tfl.gov.uk/StopPoint?lat=' + latitude + '&lon=' + longitude + '&stopTypes=NaptanMetroStation,NaptanRailStation&radius=' + searchRadius + '&useStopPointHierarchy=True&returnLines=True&app_id=' + appId + '&app_key=' + appKey;
   console.log(url);
   req.open('GET', url, true);
 
@@ -14,21 +17,37 @@ function fetchNearestTubeStation(latitude, longitude) {
       if (req.status === 200) {
         console.log(req.responseText);
         var response = JSON.parse(req.responseText);
-        var name = response[0].name;
-        var zone = response[0].zone;
-        var distance = Math.floor(response[0].results.distance);
-        console.log("Direction from: " + latitude + ", " + longitude + ", " + response[0].latitude + ", " + response[0].longitude);
-        var direction = getDirection(latitude, longitude, response[0].latitude, response[0].longitude);
+
+        var chosen;
+        var dist = searchRadius;
+        response.stopPoints.forEach(function(item, index){
+          if ( item.distance < dist ) {
+            dist = item.distance;
+            chosen = index;
+          }
+        });
+        
+        var name = response.stopPoints[chosen].commonName.replace(" Rail Station", "").replace(" Underground Station", "");
+        var linesList = [];
+        response.stopPoints[chosen].lines.forEach(function(item, index) {
+          linesList.push(item.id);
+        });
+        var zone = '3';
+        var distance = Math.floor(response.stopPoints[chosen].distance);
+        console.log("Direction from: " + latitude + ", " + longitude + ", " + response.stopPoints[chosen].lat + ", " + response.stopPoints[chosen].lon);
+        var direction = getDirection(latitude, longitude, response.stopPoints[chosen].lat, response.stopPoints[chosen].lon);
         //var direction = 123;
         console.log(name);
+        console.log(linesList);
         console.log(zone);
         console.log(distance);
         console.log(direction);
         Pebble.sendAppMessage({
-          'TUBE_STATION_NAME_KEY': name,
-          'TUBE_STATION_ZONE_KEY': 'Zone: ' + zone,
-          'TUBE_STATION_DISTANCE_KEY': distance + 'm',
-          'TUBE_STATION_DIRECTION_KEY': direction + '\xB0'
+          'NAME_KEY': name,
+          'LINES_KEY': getLines(linesList),
+          'ZONE_KEY': zone,
+          'DISTANCE_KEY': distance + 'm',
+          'DIRECTION_KEY': direction
         });
       } else {
         console.log('Error');
@@ -39,7 +58,7 @@ function fetchNearestTubeStation(latitude, longitude) {
 }
 
 function getDirection(fromLat, fromLng, toLat, toLng) {
-  var dLon = (toLng-fromLng);
+  var dLon = (fromLng-toLng);
   var y = Math.sin(dLon) * Math.cos(toLat);
   var x = Math.cos(fromLat)*Math.sin(toLat) - Math.sin(fromLat)*Math.cos(toLat)*Math.cos(dLon);
   var brng = _toDeg(Math.atan2(y, x));
@@ -49,18 +68,50 @@ function getDirection(fromLat, fromLng, toLat, toLng) {
 function _toDeg(rad) {
   return rad * 180 / Math.PI;
 }
+
 function locationSuccess(pos) {
   var coordinates = pos.coords;
   fetchNearestTubeStation(coordinates.latitude, coordinates.longitude);
 }
 
+function getLines(arrLines) {
+  var lines = 0;
+  console.log("circle check: " + arrLines.indexOf('circle'));
+  if( arrLines.indexOf('bakerloo') > 0 ) { lines += 1; }
+  console.log("lines now " + lines);
+  if( arrLines.indexOf('central') > 0 ) { lines += 2; }
+  console.log("lines now " + lines);
+  if( arrLines.indexOf('circle') > 0 ) { lines += 4; }
+  console.log("lines now " + lines);
+  if( arrLines.indexOf('district') > 0 ) { lines += 8; }
+  console.log("lines now " + lines);
+  if( arrLines.indexOf('hammersmith-city') > 0 ) { lines += 16; }
+  console.log("lines now " + lines);
+  if( arrLines.indexOf('jubilee') > 0 ) { lines += 32; }
+  console.log("lines now " + lines);
+  if( arrLines.indexOf('metropolitan') > 0 ) { lines += 64; }
+  console.log("lines now " + lines);
+  if( arrLines.indexOf('northern') > 0 ) { lines += 128; }
+  console.log("lines now " + lines);
+  if( arrLines.indexOf('piccadilly') > 0 ) { lines += 256; }
+  console.log("lines now " + lines);
+  if( arrLines.indexOf('victoria') > 0 ) { lines += 512; }
+  console.log("lines now " + lines);
+  if( arrLines.indexOf('waterloo-city') > 0 ) { lines += 1024; }
+  console.log("lines now " + lines);
+  if( arrLines.indexOf('dlr') > 0 ) { lines += 2048; }
+  console.log("lines now " + lines);
+  return lines;
+}
+
 function locationError(err) {
   console.warn('location error (' + err.code + '): ' + err.message);
   Pebble.sendAppMessage({
-    'TUBE_STATION_NAME_KEY': 'Loc Unavailable',
-    'TUBE_STATION_ZONE_KEY': 'N/A',
-    'TUBE_STATION_DISTANCE_KEY': 'N/A',
-    'TUBE_STATION_DIRECTION_KEY': 'N/A'
+    'NAME_KEY': 'Loc Unavailable',
+    'LINES_KEY': 0,
+    'ZONE_KEY': 'N/A',
+    'DISTANCE_KEY': 'N/A',
+    'DIRECTION_KEY': 0
   });
 }
 

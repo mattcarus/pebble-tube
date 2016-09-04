@@ -10,10 +10,11 @@
         "displayName": "PebbleJS Tube Helper App",
         "enableMultiJS": false,
         "messageKeys": {
-            "TUBE_STATION_DIRECTION_KEY": 3,
-            "TUBE_STATION_DISTANCE_KEY": 2,
-            "TUBE_STATION_NAME_KEY": 0,
-            "TUBE_STATION_ZONE_KEY": 1
+            "DIRECTION_KEY": 4,
+            "DISTANCE_KEY": 3,
+            "LINES_KEY": 1,
+            "NAME_KEY": 0,
+            "ZONE_KEY": 2
         },
         "projectType": "native",
         "resources": {
